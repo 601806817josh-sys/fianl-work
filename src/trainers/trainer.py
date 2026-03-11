@@ -16,15 +16,20 @@ class Trainer:
         self.criterion = nn.CrossEntropyLoss()
 
         self.dataset = CTDataset(data_dir)
-        self.dataloader = DataLoader(self.dataset, batch_size=batch_size, shuffle=True)
+
+        if len(self.dataset) == 0:
+            print("No CT files found in data/raw. Trainer initialization stopped.")
+            self.dataloader = None
+        else:
+            self.dataloader = DataLoader(self.dataset, batch_size=batch_size, shuffle=True)
 
     def train_one_epoch(self):
         self.model.train()
         epoch_loss = 0.0
 
-        if len(self.dataloader) == 0:
-            print("No data available for training.")
-            return None
+        if self.dataloader is None:
+            print("No training data available. Skipping training.")
+            return
 
         for batch in self.dataloader:
             inputs = batch.to(self.device)
